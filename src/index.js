@@ -132,14 +132,27 @@ var machine = CTOCEntry("rack", (node, { rowIndex, quantity }) => `#${rowIndex +
     ])
 );
 
+/*
+var frames = cmember("frameType", "Frame Type", CSelect([
+    ccase("in", "In-Frame"),
+    ccase("mid", "Middel-Frame"),
+    ccase("out", "Out-Frame"),
+]));
+*/
+
+var frame = cmember("frame", "Frame Type", CQuantifiedList({}, "Frames", CString()));
+
 var solution = CNameSpace("solution", CGroup([
     machineType,
-    cmember("color", "Color", CSelect([
+    frame,
+    ({ value = {} }) =>
+        value.text && value.text.trim().length > 0
+    ? cmember("color", "Color", CSelect([
         unansweredCase("Select Color"),
         ccase("red"),
         ccase("green"),
         ccase("blue"),
-    ])),
+    ])) : null,
     cmember("text", "Text to print on your T-shirt:", CString()),
 
 /*
