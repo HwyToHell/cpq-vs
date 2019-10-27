@@ -84,16 +84,6 @@ function modules(number) {
 }
 
 
-function frame(number) {
-	return CGroup([
-		for (i of range(1, number))
-			cmember(`module${i}`, `Module ${i}`, CSelect([
-				for (m of components.modules)
-				ccaseBOM(m.name, m.label, m.ports ? aggregate("power", m.power, ports(m.ports)) : undefined)
-			]))
-	]);
-}
-
 /*function transceivers(type) {
 	var ts = components.transceivers.filter(t => t.type === type);
 	if (ts) {
@@ -279,6 +269,17 @@ var rackType = ({inheritableRackProps}) => {
             ccase("R:flex", "Flexcup"),
             ccase("R:master", "Mastercup"),
 		]));
+};
+
+// machineType can be used as a group member on multiple levels.  It only
+// "materializes" if we do not yet have an "inherited" value.
+var machineType = ({ inheritableMachineProps }) => {
+    if (inheritableMachineProps.machineType == undefined)
+        return cmemberNV("inheritableMachineProps", "machineType", "Machine Type", CSelect([
+            ccase("R:doga", "Dogaseptic"),
+            ccase("R:flex", "Flexcup"),
+            ccase("R:master", "Mastercup"),
+        ]));
 };
 
 var rack =
@@ -467,28 +468,6 @@ function makeResults(node, ctx) {
 
 const mountPoint = document.getElementById("mnt");
 
-function useEmbeddedMode() {
-	// Use stand-alone mode if we are
-	// - in the top-level window or
-	// - in a window directly controlled by a webpack development server.
-	// Otherwise use embedded mode.
-	// TODO Instead of doing this "guesswork", the configurator might be told
-	// explicitly (e.g., in the query part of the URL) whether it is supposed to
-	// run in embedded or stand-alone mode.
-	try {
-		if (window.top === window ||
-			window.parent.location.pathname ===
-			"/webpack-dev-server" + window.location.pathname)
-			return false;
-	}
-	catch(e) {
-		// If we come here, it is probably because window.parent.location has a
-		// different origin and we may not access the pathname.
-	}
-	return true;
-}
 
-if (useEmbeddedMode())
-	embed(workbench, contextProvider, makeResults, mountPoint);
-else
-	renderTree(workbench, undefined, contextProvider, mountPoint);
+
+renderTree(workbench, undefined, contextProvider, mountPoint);
